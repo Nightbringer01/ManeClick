@@ -1,6 +1,8 @@
 <?php
 session_start(); // Start the session to manage user login state
 include '../config/db.php';
+include_once 'encryption.php';
+$encryption_key = $_SESSION['encrypt_key'];
 
 // Enable error reporting
 error_reporting(E_ALL);
@@ -17,20 +19,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Retrieve form data
     $id = $_POST['id'];
     $slp_id = $_SESSION['user_id'];
-    $fname = $_POST['editfname'];
-    $lname = $_POST['editlname'];
-    $email = $_POST['editemail'];
-    $disorder = $_POST['editdisorder'];
-    $sex = $_POST['editsex'];
+    $fname = encrypt($_POST['editfname'], $encryption_key);
+    $lname = encrypt($_POST['editlname'], $encryption_key);
+    $email = encrypt($_POST['editemail'], $encryption_key);
+    $disorder = encrypt($_POST['editdisorder'], $encryption_key);
+    $sex = encrypt($_POST['editsex'], $encryption_key);
     $birthdate = $_POST['editbirthdate'];
-    $address = $_POST['editaddress'];
-    $guardian = $_POST['editguardian'];
+    $address = encrypt($_POST['editaddress'], $encryption_key);
+    $guardian = encrypt($_POST['editguardian'], $encryption_key);
     $status = $_POST['editstatus'];
 
     // Retrieve province, city, and barangay values
-    $province = $_POST['selected_province_name'];
-    $city = $_POST['selected_city_name'];
-    $barangay = $_POST['selected_barangay_name'];
+    $province = encrypt($_POST['selected_province_name'], $encryption_key);
+    $city = encrypt($_POST['selected_city_name'], $encryption_key);
+    $barangay = encrypt($_POST['selected_barangay_name'], $encryption_key);
 
     // Fetch existing values from the database if new values are empty
     $existingStmt = $conn->prepare("SELECT province, city, barangay FROM patients WHERE id = :id");
@@ -69,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $archiveStmt->bindParam(':province', $province);
         $archiveStmt->bindParam(':city', $city);
         $archiveStmt->bindParam(':barangay', $barangay);
-        
+
         if (!$archiveStmt->execute()) {
             var_dump($archiveStmt->errorInfo());
             exit("Failed to archive patient details.");

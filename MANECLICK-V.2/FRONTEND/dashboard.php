@@ -18,10 +18,6 @@ $stmt = $conn->prepare("SELECT * FROM users WHERE role = 'SLP'");
 $stmt->execute();
 $slpUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$stmt = $conn->prepare("SELECT * FROM patients");
-$stmt->execute();
-$patients = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 $todayDateTime = date('Y-m-d H:i:s');
 
 $todayDate = date('Y-m-d', strtotime($todayDateTime));

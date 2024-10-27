@@ -1,6 +1,8 @@
 <?php
 session_start();
 include '../config/db.php';
+include_once 'encryption.php';
+$encryption_key = $_SESSION['encrypt_key'];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
@@ -13,30 +15,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $slp_id = $_SESSION['user_id'];
 
         // Extracting data from POST request
-        $fname = $_POST['fname'];
-        $lname = $_POST['lname'];
-        $email = $_POST['email'];
-        $disorder = $_POST['disorder'];
-        $sex = $_POST['sex'];
+        $fname = encrypt($_POST['fname'], $encryption_key);
+        $lname = encrypt($_POST['lname'], $encryption_key);
+        $email = encrypt($_POST['email'], $encryption_key);
+        $disorder = encrypt($_POST['disorder'], $encryption_key);
+        $sex = encrypt($_POST['sex'], $encryption_key);
         $birthdate = $_POST['birthdate'];
-        $address = $_POST['address'];
+        $address = encrypt($_POST['address'], $encryption_key);
 
-        $province = $_POST['selected_province'];
-        $city = $_POST['selected_city'];
-        $barangay = $_POST['selected_barangay'];
+        $province = encrypt($_POST['selected_province'], $encryption_key);
+        $city = encrypt($_POST['selected_city'], $encryption_key);
+        $barangay = encrypt($_POST['selected_barangay'], $encryption_key);
 
-        $guardian = $_POST['guardian'];
+        $guardian = encrypt($_POST['guardian'], $encryption_key);
 
         $birthdateDate = new DateTime($birthdate);
         $today = new DateTime();
-        $today->setTime(0, 0, 0); 
+        $today->setTime(0, 0, 0);
         // date validation
         if ($birthdateDate > $today) {
             http_response_code(203);
             echo json_encode(array("status" => 203, "message" => "Birthdate cannot be in the future."));
-            exit; 
+            exit;
         }
-    
+
         // Prepare and execute the insertion query
         $insertStmt = $conn->prepare("INSERT INTO patients (slp_id, fname, lname, email, disorder, sex, birthdate, address, guardian,province,city,barangay) 
         VALUES (:slp_id, :fname, :lname, :email, :disorder, :sex, :birthdate, :address, :guardian,:province,:city,:barangay)");
@@ -52,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $insertStmt->bindParam(':city', $city);
         $insertStmt->bindParam(':barangay', $barangay);
         $insertStmt->bindParam(':guardian', $guardian);
-        
+
         if ($insertStmt->execute()) {
             $type = 'Add Patient';
             $action = $_SESSION['username'] . ' added a patient named ' . $fname . ' ' . $lname;

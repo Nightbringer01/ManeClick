@@ -29,6 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['role'] = $user['role'];
                 $_SESSION['email'] = $user['email'];
+                $_SESSION['encrypt_key'] = $user['password'];
 
                 // Set HTTP status code based on user role
                 if ($_SESSION['role'] == 'admin') {

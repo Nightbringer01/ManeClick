@@ -1,6 +1,8 @@
 <?php
 session_start();
 include '../config/db.php';
+include_once 'encryption.php';
+$encryption_key = $_SESSION['encrypt_key'];
 
 // Check if the patient ID is provided in the GET request
 if (isset($_GET['patient_id'])) {
@@ -15,6 +17,17 @@ if (isset($_GET['patient_id'])) {
 
         // Fetch the patient information
         $patient = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $patient['fname'] = decrypt($patient['fname'], $encryption_key);
+        $patient['lname'] = decrypt($patient['lname'], $encryption_key);
+        $patient['email'] = decrypt($patient['email'], $encryption_key);
+        $patient['disorder'] = decrypt($patient['disorder'], $encryption_key);
+        $patient['sex'] = decrypt($patient['sex'], $encryption_key);
+        $patient['address'] = decrypt($patient['address'], $encryption_key);
+        $patient['guardian'] = decrypt($patient['guardian'], $encryption_key);
+        $patient['province'] = decrypt($patient['province'], $encryption_key);
+        $patient['barangay'] = decrypt($patient['barangay'], $encryption_key);
+        $patient['city'] = decrypt($patient['city'], $encryption_key);
 
         // Check if the patient exists
         if ($patient) {

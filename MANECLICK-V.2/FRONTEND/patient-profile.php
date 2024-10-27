@@ -1,6 +1,9 @@
 <?php
 session_start(); // Start the session to manage user login state
 include '../BACKEND/config/db.php';
+include_once '../BACKEND/routes/encryption.php';
+$encryption_key = $_SESSION['encrypt_key'];
+
 // Check if the user is not logged in (no session exists)
 if (!isset($_SESSION['username'])) {
     header("Location: login.php");
@@ -27,6 +30,17 @@ $stmt = $conn->prepare("SELECT * FROM patients WHERE id = :patientId");
 $stmt->bindParam(':patientId', $patientId, PDO::PARAM_INT);
 $stmt->execute();
 $patientDetails = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$patientDetails['fname'] = decrypt($patientDetails['fname'], $encryption_key);
+$patientDetails['lname'] = decrypt($patientDetails['lname'], $encryption_key);
+$patientDetails['email'] = decrypt($patientDetails['email'], $encryption_key);
+$patientDetails['disorder'] = decrypt($patientDetails['disorder'], $encryption_key);
+$patientDetails['sex'] = decrypt($patientDetails['sex'], $encryption_key);
+$patientDetails['address'] = decrypt($patientDetails['address'], $encryption_key);
+$patientDetails['guardian'] = decrypt($patientDetails['guardian'], $encryption_key);
+$patientDetails['province'] = decrypt($patientDetails['province'], $encryption_key);
+$patientDetails['barangay'] = decrypt($patientDetails['barangay'], $encryption_key);
+$patientDetails['city'] = decrypt($patientDetails['city'], $encryption_key);
 
 $stmt = $conn->prepare("SELECT * FROM therapy WHERE patient_id = :patientId");
 $stmt->bindParam(':patientId', $patientId, PDO::PARAM_INT);
