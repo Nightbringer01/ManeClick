@@ -1,0 +1,64 @@
+/* styles.css */
+
+/* Resetting default margin and padding */
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    
+}
+
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: #2C3E50; /* A deeper, more modern shade of gray */
+    background: linear-gradient(150deg, #F2F0D7, #ECE7C3, #f1d7a7); 
+    /* background: radial-gradient( circle farthest-corner at 10% 20%,  rgb(161, 199, 184) 42%, rgba(92,202,238,0.41) 93.6% ); */
+    margin: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased; /* Smoother font rendering */
+}
+
+
+h1,
+h2,
+h3 {
+    margin-bottom: 10px;
+}
+
+h1 {
+    font-size: 36px;
+}
+
+h2 {
+    font-size: 24px;
+}
+
+h3 {
+    font-size: 18px;
+}
+
+p {
+    margin-bottom: 15px;
+}
+
+
+.main-content {
+    padding: 20px;
+}
+
+/* Footer styles */
+footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Responsive layout adjustments */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 24px;
+    }
+}

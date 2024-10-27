@@ -1,0 +1,7 @@
+.header-div{
+    display: block;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    color: red;
+}
