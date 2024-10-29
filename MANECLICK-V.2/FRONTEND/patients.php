@@ -136,7 +136,8 @@ $userDets = $stmt->fetch(PDO::FETCH_ASSOC);
                                     data-id="<?php echo $patient['id']; ?>"><i class="fas fa-edit"></i></a>
                                 <!-- Email icon -->
                                 <a href="#" class="text-success sendEmailBtn" data-id="<?php echo $patient['id']; ?>"
-                                    data-email="<?php echo $patient['email']; ?>"><i class="fas fa-envelope"></i></a>
+                                    data-email="<?php echo decrypt($patient['email'], $_SESSION['encrypt_key']); ?>"><i
+                                        class="fas fa-envelope"></i></a>
                                 <!-- Email icon -->
                             </td>
                         </tr>
@@ -779,7 +780,7 @@ $userDets = $stmt->fetch(PDO::FETCH_ASSOC);
                     Swal.fire({
                         icon: 'error',
                         title: 'Oops...',
-                        text: 'An error occurred while updating patient details',
+                        text: 'An error occurred while sending email',
                     });
                     console.error('Error:', error);
                     console.error('Response:', xhr.responseText); // Log full response for debugging
@@ -910,6 +911,7 @@ $userDets = $stmt->fetch(PDO::FETCH_ASSOC);
                                 email: email
                             },
                             success: function (response) {
+                                console.log(response)
                                 Swal.fire(
                                     'Sent!',
                                     'Email has been sent successfully.',

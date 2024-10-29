@@ -48,109 +48,154 @@ $seshGoalsDataJson = json_encode($seshGoalsData);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Print Chart</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <style>
         .page-break {
             page-break-before: always;
         }
-        .bodypage{
-            background-color:#555555
+
+        .bodypage {
+            background-color: #555555
         }
-        .printbtn{
+
+        .printbtn {
             position: absolute;
             top: 10px;
             right: 10px;
-            font-size:larger; 
+            font-size: larger;
+        }
+
+        .sendEmailbtn {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            font-size: larger;
         }
     </style>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 </head>
+
 <body class='bodypage'>
+    <div id="loader"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); z-index: 9999;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+            <img src="../FRONTEND/img/load.gif" alt="Loader" style="width:20px; height:20px">
+            <p>Loading...</p>
+        </div>
+    </div>
     <button class="printbtn" id="printButton">Print PDF</button>
+    <button class="sendEmailbtn" id="sendEmailButton">Email to Patient</button>
     <div id="mainContainer" style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
-        <div id="viewTherapyDetails" style="display: flex; justify-content:center; align-items:center; width:600px; border:2x solid #B7BF96; background-color:white; height:750px; ">
+        <div id="viewTherapyDetails"
+            style="display: flex; justify-content:center; align-items:center; width:600px; border:2x solid #B7BF96; background-color:white; height:750px; ">
             <div class="card" style="border:1px solid black; width:100%; padding:4px">
                 <div class="card-header bg-light">
-                    <h5 class="card-title" style="font-size: x-large; font-weight:800; color:#415E35; font-family: 'Roboto', sans-serif;">Therapy Details <span><?php echo $therapyDets['DSI'] ?></span></h5>
+                    <h5 class="card-title"
+                        style="font-size: x-large; font-weight:800; color:#415E35; font-family: 'Roboto', sans-serif;">
+                        Therapy Details <span><?php echo $therapyDets['DSI'] ?></span></h5>
                 </div>
                 <div class="card-body" style="font-size: large; font-family: 'Roboto', sans-serif;">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Patient Name:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Patient
+                                Name:</span></strong>
                         <span class="align-middle"><?php echo $therapyDets['name']; ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Sex:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Sex:</span></strong>
                         <span class="align-middle"><?php echo $therapyDets['sex']; ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">SLP:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">SLP:</span></strong>
                         <span class="align-middle"><?php echo $therapyDets['SLP']; ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Disorder:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Disorder:</span></strong>
                         <span class="align-middle"><?php echo $therapyDets['disorders']; ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Created At:</span></strong>
-                        <span class="align-middle"><?php echo date('F j, Y', strtotime($therapyDets['createdAt'])); ?></span>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Created
+                                At:</span></strong>
+                        <span
+                            class="align-middle"><?php echo date('F j, Y', strtotime($therapyDets['createdAt'])); ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Valid Until:</span></strong>
-                        <span class="align-middle"><?php echo date('F j, Y', strtotime($therapyDets['valid_until'])); ?></span>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Valid
+                                Until:</span></strong>
+                        <span
+                            class="align-middle"><?php echo date('F j, Y', strtotime($therapyDets['valid_until'])); ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">First Therapy Date:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">First
+                                Therapy Date:</span></strong>
                         <span class="align-middle"><?php echo date('F j, Y', strtotime($therapyDets['FTD'])); ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Target Finish Date:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Target
+                                Finish Date:</span></strong>
                         <span class="align-middle"><?php echo date('F j, Y', strtotime($therapyDets['TFD'])); ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Date of Evaluation;:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Date
+                                of Evaluation;:</span></strong>
                         <span class="align-middle"><?php echo date('F j, Y', strtotime($therapyDets['DOE'])); ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Status:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Status:</span></strong>
                         <span class="align-middle"><?php echo $therapyDets['status']; ?></span>
                     </p>
                 </div>
             </div>
         </div>
-        <div class="page-break col-md-12" style="display: block; justify-content:center; align-items:center; width:600px; border:2x solid #B7BF96; background-color:white; height:auto;">
-                    <h3 style="color:#133A1B">Overall Session Reviews</h3>
-                    <?php foreach ($existSession as $session) : ?>
-                        <div class="card mt-3">
-                            <div class="card-body">
-                                <h5 class="card-title">Word Details</h5>
-                                <p class="card-text"><strong>Word: </strong><?php echo $session['word']; ?></p>
-                                <p class="card-text"><strong>Prompt: </strong><?php echo $session['prompt']; ?></p>
-                                <p class="card-text"><strong>Interpretation: </strong><?php echo $session['interpretation']; ?></p>
-                                <p class="card-text"><strong>Remarks: </strong><?php echo $session['remarks']; ?></p>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
+        <div class="page-break col-md-12"
+            style="display: block; justify-content:center; align-items:center; width:600px; border:2x solid #B7BF96; background-color:white; height:auto;">
+            <h3 style="color:#133A1B">Overall Session Reviews</h3>
+            <?php foreach ($existSession as $session): ?>
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Word Details</h5>
+                        <p class="card-text"><strong>Word: </strong><?php echo $session['word']; ?></p>
+                        <p class="card-text"><strong>Prompt: </strong><?php echo $session['prompt']; ?></p>
+                        <p class="card-text"><strong>Interpretation: </strong><?php echo $session['interpretation']; ?></p>
+                        <p class="card-text"><strong>Remarks: </strong><?php echo $session['remarks']; ?></p>
+                    </div>
                 </div>
-        <div id="chartContainer" class='page-break' style="display:flex; flex-direction:row; justify-content:center; align-items:center; width:600px; height:400px; background-color:white" >
+            <?php endforeach; ?>
+        </div>
+        <div id="chartContainer" class='page-break'
+            style="display:flex; flex-direction:row; justify-content:center; align-items:center; width:600px; height:400px; background-color:white">
             <h5>Was the Goal Reached in Session?</h5>
             <canvas id="pieChart"></canvas>
         </div>
-        <div id="chartContainer" class='page-break' style="display:flex; justify-content:center; align-items:center; width:600px; height:500px; background-color:white" >
+        <div id="chartContainer" class='page-break'
+            style="display:flex; justify-content:center; align-items:center; width:600px; height:500px; background-color:white">
             <canvas id="myChart"></canvas>
         </div>
 
@@ -159,6 +204,10 @@ $seshGoalsDataJson = json_encode($seshGoalsData);
 
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+
+        $('document').ready(() => {
+            $('#loader').hide();
+        });
         var logs = <?php echo json_encode($therapyDets); ?>
 
         // Retrieve chart data from session storage
@@ -208,10 +257,10 @@ $seshGoalsDataJson = json_encode($seshGoalsData);
                 },
                 tooltips: {
                     callbacks: {
-                        title: function(tooltipItems) {
+                        title: function (tooltipItems) {
                             return 'Predicted Value: ' + tooltipItems[0].label;
                         },
-                        label: function(tooltipItem) {
+                        label: function (tooltipItem) {
                             const predicted = tooltipItem.raw;
                             return 'Description: ' + descriptions[predicted];
                         }
@@ -221,7 +270,7 @@ $seshGoalsDataJson = json_encode($seshGoalsData);
         });
 
         function generatePDF() {
-            const element = document.getElementById('mainContainer'); 
+            const element = document.getElementById('mainContainer');
 
             html2pdf().from(element).set({
                 margin: 1,
@@ -232,9 +281,71 @@ $seshGoalsDataJson = json_encode($seshGoalsData);
             }).save();
         }
         document.getElementById('printButton').addEventListener('click', generatePDF);
+
+        async function sendEmail(e) {
+
+            $('#loader').show();
+            const element = document.getElementById('mainContainer');
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+
+            const pid = urlParams.get('pid');
+
+            pdfAsString = await html2pdf().from(element).set({
+                margin: 1,
+                filename: 'therapy-details.pdf',
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'in', format: 'letter' },
+                pagebreak: { mode: ['css', 'legacy'], before: '.page-break' }
+            }).toPdf().output('datauristring');
+
+            // The PDF has been converted to a Data URI string and passed to this function.
+            // Use pdfAsString however you like (send as email, etc)!
+            var arr = pdfAsString.split(',');
+            pdfAsString = arr[1];
+
+            var formdata = new FormData();
+            formdata.append("data", pdfAsString);
+            formdata.append("pid", pid);
+
+            $.ajax({
+                url: '/MANECLICK-V.2/BACKEND/Util/sendemail.php',
+                type: 'POST',
+                processData: false,
+                contentType: false,
+                data: formdata,
+                success: function (response) {
+                    // Display success message using Swal.fire
+                    Swal.fire({
+                        icon: 'success',
+                        title: "Email Sent.",
+                        text: response,
+                    })
+
+                    $('#loader').hide();
+                },
+                error: function (xhr, status, error) {
+                    // Display error message using Swal.fire
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'An error occurred while sending email.',
+                    });
+                    console.error('Error:', error);
+                    console.error('Response:', xhr.responseText); // Log full response for debugging
+                    $('#loader').hide();
+                }
+
+            })
+
+            // e.preventDefault();  //stop the browser from following
+            // window.location.href = 'uploads/file.pdf';
+
+        }
+        document.getElementById('sendEmailButton').addEventListener('click', sendEmail);
     </script>
 
-<script>
+    <script>
         // Parse the JSON data for session goals
         const seshGoalsData = <?php echo $seshGoalsDataJson; ?>;
 
@@ -270,7 +381,7 @@ $seshGoalsDataJson = json_encode($seshGoalsData);
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(tooltipItem) {
+                            label: function (tooltipItem) {
                                 return tooltipItem.label + ': ' + tooltipItem.raw;
                             }
                         }
@@ -280,4 +391,5 @@ $seshGoalsDataJson = json_encode($seshGoalsData);
         });
     </script>
 </body>
+
 </html>

@@ -48,9 +48,10 @@ $stmt->execute();
 $therapyDets = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $stmt = $conn->prepare("SELECT * FROM users WHERE id = :user_id");
-$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);  
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
 $stmt->execute();
 $userDets = $stmt->fetch(PDO::FETCH_ASSOC);
+
 
 $sessionstmt = $conn->prepare("SELECT patient_id, DSI, DATE_FORMAT(DATE_ADD(createdAt, INTERVAL 8 HOUR), '%Y-%m-%d') AS createdAt FROM t_sessions WHERE patient_id = :patientId");
 $sessionstmt->bindParam(':patientId', $patientId, PDO::PARAM_INT);
@@ -186,60 +187,70 @@ foreach ($sessionsHistory as $session) {
         <div class="d-flex flex-column" style="width:30%; align-items:center">
             <!-- Three buttons using Bootstrap classes -->
             <button type="button" class="btn mb-2" id="informationBtn">Information</button>
-            <button type="button" class="btn mb-2" id="newTherapyBtn" <?php if ($existTherapy === "1") echo "disabled"; ?>>New Therapy</button>
-            <button type="button" class="btn mb-2" id="addSessionBtn" <?php if ($existTherapy === "0") echo "disabled"; ?>>Add Session</button>
-            <button type="button" class="btn mb-2" id="viewTherapyBtn" <?php if ($existTherapy === "0") echo "disabled"; ?>>View Therapy Details</button>
-            <button type="button" class="btn mb-2" id="viewGenerateReportBtn" <?php if ($existTherapy === "0") echo "disabled"; ?>>Generate Report</button>
+            <button type="button" class="btn mb-2" id="newTherapyBtn" <?php if ($existTherapy === "1")
+                echo "disabled"; ?>>New Therapy</button>
+            <button type="button" class="btn mb-2" id="addSessionBtn" <?php if ($existTherapy === "0")
+                echo "disabled"; ?>>Add Session</button>
+            <button type="button" class="btn mb-2" id="viewTherapyBtn" <?php if ($existTherapy === "0")
+                echo "disabled"; ?>>View Therapy Details</button>
+            <button type="button" class="btn mb-2" id="viewGenerateReportBtn" <?php if ($existTherapy === "0")
+                echo "disabled"; ?>>Generate Report</button>
         </div>
 
         <div id="informationTab" style="display: flex; width:50%; border:4px solid #B7BF96">
-            <div id="patientInfo" style="display:flex; flex-direction:column; background-color:white; padding:10px 5px; width:50%; justify-content:center; align-items: center;">
+            <div id="patientInfo"
+                style="display:flex; flex-direction:column; background-color:white; padding:10px 5px; width:50%; justify-content:center; align-items: center;">
 
             </div>
-            <div id="therapyHistory" style="display:flex; flex-direction:column; background-color:white; padding:10px 5px; width:50%;  align-items: center; text-align:center">
+            <div id="therapyHistory"
+                style="display:flex; flex-direction:column; background-color:white; padding:10px 5px; width:50%;  align-items: center; text-align:center">
                 <h3 style="margin-bottom: 15px; margin-top:5px;">Session History</h3>
                 <p style="font-size:larger; "><?php
-                                                // Define an array for month names
-                                                $monthNames = array(
-                                                    1 => 'January',
-                                                    2 => 'February',
-                                                    3 => 'March',
-                                                    4 => 'April',
-                                                    5 => 'May',
-                                                    6 => 'June',
-                                                    7 => 'July',
-                                                    8 => 'August',
-                                                    9 => 'September',
-                                                    10 => 'October',
-                                                    11 => 'November',
-                                                    12 => 'December'
-                                                );
+                // Define an array for month names
+                $monthNames = array(
+                    1 => 'January',
+                    2 => 'February',
+                    3 => 'March',
+                    4 => 'April',
+                    5 => 'May',
+                    6 => 'June',
+                    7 => 'July',
+                    8 => 'August',
+                    9 => 'September',
+                    10 => 'October',
+                    11 => 'November',
+                    12 => 'December'
+                );
 
-                                                // Display the distinct dates
-                                                foreach ($distinctDates as $date) {
-                                                    // Convert the date string to a timestamp
-                                                    $timestamp = strtotime($date);
+                // Display the distinct dates
+                foreach ($distinctDates as $date) {
+                    // Convert the date string to a timestamp
+                    $timestamp = strtotime($date);
 
-                                                    // Extract components of the date
-                                                    $day = date('d', $timestamp);
-                                                    $month = date('n', $timestamp); // Numeric representation of the month
-                                                    $year = date('Y', $timestamp);
+                    // Extract components of the date
+                    $day = date('d', $timestamp);
+                    $month = date('n', $timestamp); // Numeric representation of the month
+                    $year = date('Y', $timestamp);
 
-                                                    $wordedDate = $monthNames[$month] . ' ' . $day . ', ' . $year;
+                    $wordedDate = $monthNames[$month] . ' ' . $day . ', ' . $year;
 
-                                                    // Output the worded date
-                                                    echo "<a href='session-profile.php?patient_id=$patientId&date=$date'>$wordedDate</a><br><br>";
-                                                }
-                                                ?>
+                    // Output the worded date
+                    echo "<a href='session-profile.php?patient_id=$patientId&date=$date'>$wordedDate</a><br><br>";
+                }
+                ?>
                 </p>
             </div>
         </div>
 
-        <div id="addSessionTab" style="display: none; width:50%; border:4px solid #B7BF96; background-color:whitesmoke;">
-            <form id="sessionForm" style="display:flex; flex-direction:column; width:100%; padding: 10px; justify-content:center; align-items:center" method="post">
+        <div id="addSessionTab"
+            style="display: none; width:50%; border:4px solid #B7BF96; background-color:whitesmoke;">
+            <form id="sessionForm"
+                style="display:flex; flex-direction:column; width:100%; padding: 10px; justify-content:center; align-items:center"
+                method="post">
                 <h4>Session Form</h4>
                 <div class="form-group" style="width:50%">
-                    <textarea class="form-control" placeholder="Goal for this session" id="goal" name="goal" rows="4" required></textarea>
+                    <textarea class="form-control" placeholder="Goal for this session" id="goal" name="goal" rows="4"
+                        required></textarea>
                 </div>
                 <div id="wordPrompts" style="width:80%">
                     <!-- This div will contain dynamically added word prompt sections -->
@@ -252,29 +263,38 @@ foreach ($sessionsHistory as $session) {
         </div>
 
         <div id="addTherapyTab" style="display: none; width:50%; border:4px solid #B7BF96; background-color:white;">
-            <form id="therapyForm" style="display:flex; flex-direction:column; width:100%; padding: 10px; justify-content:center; align-items:center">
+            <form id="therapyForm"
+                style="display:flex; flex-direction:column; width:100%; padding: 10px; justify-content:center; align-items:center">
                 <h4>THERAPY FORM</h4>
                 <div style="display:flex; flex-direction: row; justify-content:space-evenly; width:100%">
                     <div style="width:48%;">
                         <div class="form-group">
                             <label for="name">Patient Name</label>
-                            <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($patientDetails['fname']) . ' ' . htmlspecialchars($patientDetails['lname']) ; ?>" readonly required>
+                            <input type="text" class="form-control" id="name" name="name"
+                                value="<?php echo htmlspecialchars($patientDetails['fname']) . ' ' . htmlspecialchars($patientDetails['lname']); ?>"
+                                readonly required>
                         </div>
                         <div class="form-group">
                             <label for="sex">Sex</label>
                             <!-- <select class="form-control" id="sex" name="sex" required> -->
-                            <input type="text" class="form-control" id="sex" name="sex" value="<?php echo htmlspecialchars($patientDetails['sex']) ; ?>" readonly required>
-                                <!-- <option value="Male" <?php if ($patientDetails['sex'] === 'male') echo 'selected'; ?>>Male</option>
-                                <option value="Female" <?php if ($patientDetails['sex'] === 'female') echo 'selected'; ?>>Female</option> -->
+                            <input type="text" class="form-control" id="sex" name="sex"
+                                value="<?php echo htmlspecialchars($patientDetails['sex']); ?>" readonly required>
+                            <!-- <option value="Male" <?php if ($patientDetails['sex'] === 'male')
+                                echo 'selected'; ?>>Male</option>
+                                <option value="Female" <?php if ($patientDetails['sex'] === 'female')
+                                    echo 'selected'; ?>>Female</option> -->
                             <!-- </select> -->
                         </div>
                         <div class="form-group">
                             <label for="slp">Speech-Language Pathologist (SLP)</label>
-                            <input type="text" class="form-control" id="slp" name="SLP" value="<?php echo htmlspecialchars($userDets['firstname']) . ' ' .htmlspecialchars($userDets['lastname']);?>" readonly required>
+                            <input type="text" class="form-control" id="slp" name="SLP"
+                                value="<?php echo htmlspecialchars($userDets['firstname']) . ' ' . htmlspecialchars($userDets['lastname']); ?>"
+                                readonly required>
                         </div>
                         <div class="form-group">
                             <label for="disorders">Disorders</label>
-                            <input type="text" class="form-control" id="disorders" name="disorders" value="<?php echo htmlspecialchars($patientDetails['disorder']); ?>" readonly required>
+                            <input type="text" class="form-control" id="disorders" name="disorders"
+                                value="<?php echo htmlspecialchars($patientDetails['disorder']); ?>" readonly required>
                         </div>
                     </div>
                     <div style="width:48%;">
@@ -300,69 +320,93 @@ foreach ($sessionsHistory as $session) {
             </form>
         </div>
 
-        <div id="viewTherapyDetails" style="display: none; width:50%; border:4px solid #B7BF96; background-color:white;">
+        <div id="viewTherapyDetails"
+            style="display: none; width:50%; border:4px solid #B7BF96; background-color:white;">
             <div class="card" style="border:1px solid black; width:100%">
                 <div class="card-header bg-light">
-                    <h5 class="card-title" style="font-size: x-large; font-weight:800; color:#415E35; font-family: 'Roboto', sans-serif;">Therapy Details <span><?php echo $therapyDets['DSI'] ?></span></h5>
+                    <h5 class="card-title"
+                        style="font-size: x-large; font-weight:800; color:#415E35; font-family: 'Roboto', sans-serif;">
+                        Therapy Details <span><?php echo $therapyDets['DSI'] ?></span></h5>
                 </div>
                 <div class="card-body" style="font-size: x-large; font-family: 'Roboto', sans-serif;">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Patient Name:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Patient
+                                Name:</span></strong>
                         <span class="align-middle"><?php echo $therapyDets['name']; ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Sex:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Sex:</span></strong>
                         <span class="align-middle"><?php echo $therapyDets['sex']; ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">SLP:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">SLP:</span></strong>
                         <span class="align-middle"><?php echo $therapyDets['SLP']; ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Disorder:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Disorder:</span></strong>
                         <span class="align-middle"><?php echo $therapyDets['disorders']; ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Created At:</span></strong>
-                        <span class="align-middle"><?php echo date('F j, Y', strtotime($therapyDets['createdAt'])); ?></span>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Created
+                                At:</span></strong>
+                        <span
+                            class="align-middle"><?php echo date('F j, Y', strtotime($therapyDets['createdAt'])); ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Valid Until:</span></strong>
-                        <span class="align-middle"><?php echo date('F j, Y', strtotime($therapyDets['valid_until'])); ?></span>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Valid
+                                Until:</span></strong>
+                        <span
+                            class="align-middle"><?php echo date('F j, Y', strtotime($therapyDets['valid_until'])); ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">First Therapy Date:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">First
+                                Therapy Date:</span></strong>
                         <span class="align-middle"><?php echo date('F j, Y', strtotime($therapyDets['FTD'])); ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Target Finish Date:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Target
+                                Finish Date:</span></strong>
                         <span class="align-middle"><?php echo date('F j, Y', strtotime($therapyDets['TFD'])); ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Date of Evaluation;:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Date
+                                of Evaluation;:</span></strong>
                         <span class="align-middle"><?php echo date('F j, Y', strtotime($therapyDets['DOE'])); ?></span>
                     </p>
                     <hr class="gray-line">
                     <p style="border: 2px solid gray;">
-                        <strong><span style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Status:</span></strong>
+                        <strong><span
+                                style="display: inline-block; width: 250px; border-right: 2px solid gray; padding-right: 5px;">Status:</span></strong>
                         <span class="align-middle"><?php echo $therapyDets['status']; ?></span>
                     </p>
                 </div>
             </div>
         </div>
 
-        <div id="viewGenerateReport" style="display: none; width:50%; border:4px solid #B7BF96; background-color:white;">
+        <div id="viewGenerateReport"
+            style="display: none; width:50%; border:4px solid #B7BF96; background-color:white;">
             <div class="card" style="border:1px solid black; width:100%">
                 <div class="card-header bg-light">
-                    <h5 class="card-title" style="font-size: x-large; font-weight:800; color:#415E35; font-family: 'Roboto', sans-serif;">Generate Report </h5>
+                    <h5 class="card-title"
+                        style="font-size: x-large; font-weight:800; color:#415E35; font-family: 'Roboto', sans-serif;">
+                        Generate Report </h5>
                 </div>
                 <div class="card-body">
                     <form id="arimaForm" method="get">
@@ -371,7 +415,7 @@ foreach ($sessionsHistory as $session) {
                 </div>
                 <!-- Empty div to hold the chart -->
                 <div id="chartContainer">
-              
+
                 </div>
                 <button id="printButton" style="display:none;" onclick="openPrintPage()">GO TO PRINT PAGE</button>
 
@@ -387,13 +431,13 @@ foreach ($sessionsHistory as $session) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-         const today = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split('T')[0];
         document.getElementById('dateOfEvaluation').setAttribute('min', today);
         document.getElementById('validUntil').setAttribute('min', today);
         document.getElementById('firstTherapyDate').setAttribute('min', today);
         document.getElementById('targetFinishDate').setAttribute('min', today);
 
-        document.getElementById('sex').addEventListener('focus', function() {
+        document.getElementById('sex').addEventListener('focus', function () {
             this.blur();
         });
 
@@ -445,23 +489,23 @@ foreach ($sessionsHistory as $session) {
 
 
         // FOR VIEWING OF DIFFERENT TABS IN PROFILE
-        document.getElementById("newTherapyBtn").addEventListener("click", function() {
+        document.getElementById("newTherapyBtn").addEventListener("click", function () {
             showAddTherapyTab(); // Call the function to show add therapy tab
         });
 
-        document.getElementById("addSessionBtn").addEventListener("click", function() {
+        document.getElementById("addSessionBtn").addEventListener("click", function () {
             showAddSession();
         });
 
-        document.getElementById("viewTherapyBtn").addEventListener("click", function() {
+        document.getElementById("viewTherapyBtn").addEventListener("click", function () {
             showTherapyDetails();
         });
 
-        document.getElementById("informationBtn").addEventListener("click", function() {
+        document.getElementById("informationBtn").addEventListener("click", function () {
             showInformationTab(); // Call the function to show information tab
         });
 
-        document.getElementById("viewGenerateReportBtn").addEventListener("click", function() {
+        document.getElementById("viewGenerateReportBtn").addEventListener("click", function () {
             showGenerateReport();
         });
 
@@ -473,7 +517,7 @@ foreach ($sessionsHistory as $session) {
             data: {
                 patient_id: patient_id
             },
-            success: function(response) {
+            success: function (response) {
                 var createdAt = new Date(response.created_at);
                 createdAt.setHours(createdAt.getHours() + 8);
                 var formattedDate = getWordedDate(createdAt);
@@ -499,13 +543,13 @@ foreach ($sessionsHistory as $session) {
                 <p>${formattedDate}</p>
             `);
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 // Handle error
                 console.error(xhr.responseText);
             }
         });
 
-        $('#therapyForm').submit(function(event) {
+        $('#therapyForm').submit(function (event) {
             event.preventDefault(); // Prevent default form submission
 
             // Retrieve form data
@@ -526,7 +570,7 @@ foreach ($sessionsHistory as $session) {
                 url: '../BACKEND/routes/add_therapy_process.php',
                 type: 'POST',
                 data: formData,
-                success: function(response) {
+                success: function (response) {
                     if (response === "Therapy information inserted successfully.") {
                         // Therapy information inserted successfully
                         Swal.fire({
@@ -535,7 +579,7 @@ foreach ($sessionsHistory as $session) {
                             text: 'You have successfully started a therapy.',
                             showConfirmButton: false,
                             timer: 2000
-                        }).then(function() {
+                        }).then(function () {
                             window.location.reload()
                         })
                     } else {
@@ -547,7 +591,7 @@ foreach ($sessionsHistory as $session) {
                         });
                     }
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Error inserting therapy information:', error);
                     // Error handling
                     Swal.fire({
@@ -559,7 +603,7 @@ foreach ($sessionsHistory as $session) {
             });
         });
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             var maxWords = 10;
             var wordCount = 0;
 
@@ -606,7 +650,7 @@ foreach ($sessionsHistory as $session) {
             }
 
             // Event listener for the add word prompt button
-            $('#addWordPrompt').click(function() {
+            $('#addWordPrompt').click(function () {
                 addWordPrompt();
             });
 
@@ -626,8 +670,8 @@ foreach ($sessionsHistory as $session) {
             //     });
             // 
         });
-        $(document).ready(function() {
-            $('#sessionForm').on('submit', function(e) {
+        $(document).ready(function () {
+            $('#sessionForm').on('submit', function (e) {
                 e.preventDefault(); // Prevent default form submission
 
                 Swal.fire({
@@ -647,7 +691,7 @@ foreach ($sessionsHistory as $session) {
                             goal: $('#goal').val(),
                             patient_id: patient_id
                         },
-                        success: function(response) {
+                        success: function (response) {
                             if (response.status === 'success') {
                                 // Proceed with session data submission
                                 var formData = $('#sessionForm').serialize();
@@ -657,15 +701,15 @@ foreach ($sessionsHistory as $session) {
                                     type: 'POST',
                                     url: '../BACKEND/routes/add_session_process.php',
                                     data: formData,
-                                    success: function(response) {
+                                    success: function (response) {
                                         var jsonResponse = JSON.parse(response);
                                         if (jsonResponse.status === 'success') {
                                             Swal.fire({
                                                 icon: 'success',
                                                 title: 'Success',
                                                 text: jsonResponse.message,
-                                            }).then(function() {
-                                                window.location.reload(); 
+                                            }).then(function () {
+                                                window.location.reload();
                                             });
                                         } else {
                                             Swal.fire({
@@ -673,12 +717,12 @@ foreach ($sessionsHistory as $session) {
                                                 title: 'success',
                                                 text: jsonResponse.message,
                                             })
-                                            .then(function() {
-                                                window.location.reload(); 
-                                            });
+                                                .then(function () {
+                                                    window.location.reload();
+                                                });
                                         }
                                     },
-                                    error: function(xhr, status, error) {
+                                    error: function (xhr, status, error) {
                                         console.error(xhr.responseText);
                                         Swal.fire({
                                             icon: 'error',
@@ -695,7 +739,7 @@ foreach ($sessionsHistory as $session) {
                                 });
                             }
                         },
-                        error: function(xhr, status, error) {
+                        error: function (xhr, status, error) {
                             console.error(xhr.responseText);
                             Swal.fire({
                                 icon: 'error',
@@ -707,170 +751,170 @@ foreach ($sessionsHistory as $session) {
                 });
             });
         });
-        $(document).ready(function() {
-    let responseData; // Declare responseData at a higher scope
+        $(document).ready(function () {
+            let responseData; // Declare responseData at a higher scope
 
-    $('#arimaForm').submit(function(event) {
-        event.preventDefault(); // Prevent the default form submission
+            $('#arimaForm').submit(function (event) {
+                event.preventDefault(); // Prevent the default form submission
 
-        // Retrieve values of p, q, and d from the form inputs
-        var p = 2
-        var q = 1
-        var d = 1
+                // Retrieve values of p, q, and d from the form inputs
+                var p = 2
+                var q = 1
+                var d = 1
 
-        // Retrieve patient_id from URL parameter pid
-        var patient_id = getUrlParameter('pid');
-        $.ajax({
-            type: 'POST',
-            url: '../BACKEND/routes/audit_logs.php',
-            success: function(response) {
-                var result = JSON.parse(response);
-                if (result.status === 'success') {
-                    // alert('Log entry created successfully!');
-                } else {
-                    // alert('Error: ' + result.message);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('AJAX Error: ' + status + error);
-            }
-        });
+                // Retrieve patient_id from URL parameter pid
+                var patient_id = getUrlParameter('pid');
+                $.ajax({
+                    type: 'POST',
+                    url: '../BACKEND/routes/audit_logs.php',
+                    success: function (response) {
+                        var result = JSON.parse(response);
+                        if (result.status === 'success') {
+                            // alert('Log entry created successfully!');
+                        } else {
+                            // alert('Error: ' + result.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('AJAX Error: ' + status + error);
+                    }
+                });
 
-        // AJAX request
-        $.ajax({
-            type: 'GET',
-            url: 'http://54.252.254.132:8080/api/arima',
-            contentType: 'application/json',
-            data: ({ // Convert data to JSON string
-                patient_id: patient_id,
-                p_value: p,
-                q_value: q,
-                d_value: d
-            }),
-            success: function(response) {
+                // AJAX request
+                $.ajax({
+                    type: 'GET',
+                    url: 'http://54.252.254.132:8080/api/arima',
+                    contentType: 'application/json',
+                    data: ({ // Convert data to JSON string
+                        patient_id: patient_id,
+                        p_value: p,
+                        q_value: q,
+                        d_value: d
+                    }),
+                    success: function (response) {
 
-                // Check if there is data available
-                if (Object.keys(response.Prompts).length > 0) {
+                        // Check if there is data available
+                        if (Object.keys(response.Prompts).length > 0) {
 
-                    // Clear the existing chart container
-                    $('#chartContainer').empty();
+                            // Clear the existing chart container
+                            $('#chartContainer').empty();
 
-                    // Assign response data to the higher scoped variable
-                    responseData = response;
+                            // Assign response data to the higher scoped variable
+                            responseData = response;
 
-                    // Extracting dates and values from the response data
-                    const dates = Object.keys(responseData.Prompts);
-                    const values = Object.values(responseData.Prompts);
+                            // Extracting dates and values from the response data
+                            const dates = Object.keys(responseData.Prompts);
+                            const values = Object.values(responseData.Prompts);
 
-                    // Extract the predicted prompt value
-                    const predictedPrompt = responseData.predicted_prompt;
+                            // Extract the predicted prompt value
+                            const predictedPrompt = responseData.predicted_prompt;
 
-                    const descriptions = {
-                        100: "Showing Correct Independent Production",
-                        80: "Visual Prompt",
-                        60: "Verbal Prompt",
-                        40: "Tactile Prompt",
-                        20: "Hand under Hand Assistance"
-                    };
+                            const descriptions = {
+                                100: "Showing Correct Independent Production",
+                                80: "Visual Prompt",
+                                60: "Verbal Prompt",
+                                40: "Tactile Prompt",
+                                20: "Hand under Hand Assistance"
+                            };
 
-                    // Create a new canvas element dynamically
-                    const canvas = document.createElement('canvas');
-                    canvas.id = 'myChart';
-                    document.getElementById('chartContainer').appendChild(canvas); // Append canvas to the chartContainer div
+                            // Create a new canvas element dynamically
+                            const canvas = document.createElement('canvas');
+                            canvas.id = 'myChart';
+                            document.getElementById('chartContainer').appendChild(canvas); // Append canvas to the chartContainer div
 
-                    // Create a new Chart instance
-                    const ctx = document.getElementById('myChart').getContext('2d');
-                    const myChart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: [...dates, 'Predicted'],
-                            datasets: [{
-                                label: 'Prompt Values',
-                                data: [...values, predictedPrompt],
-                                backgroundColor: (context) => {
-                                    // Set different colors for actual prompts and the predicted prompt
-                                    return context.raw === predictedPrompt ? 'rgba(255, 99, 132, 0.2)' : 'rgba(75, 192, 192, 0.2)';
+                            // Create a new Chart instance
+                            const ctx = document.getElementById('myChart').getContext('2d');
+                            const myChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: [...dates, 'Predicted'],
+                                    datasets: [{
+                                        label: 'Prompt Values',
+                                        data: [...values, predictedPrompt],
+                                        backgroundColor: (context) => {
+                                            // Set different colors for actual prompts and the predicted prompt
+                                            return context.raw === predictedPrompt ? 'rgba(255, 99, 132, 0.2)' : 'rgba(75, 192, 192, 0.2)';
+                                        },
+                                        borderColor: (context) => {
+                                            // Set different border colors for actual prompts and the predicted prompt
+                                            return context.raw === predictedPrompt ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)';
+                                        },
+                                        borderWidth: 1
+                                    }]
                                 },
-                                borderColor: (context) => {
-                                    // Set different border colors for actual prompts and the predicted prompt
-                                    return context.raw === predictedPrompt ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)';
-                                },
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            plugins: {
-                                title: {
-                                    display: true,
-                                    text: 'Prompts Average & Forecasted Value for Next Session'
-                                },
-                                legend: {
-                                    display: false
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            },
-                            tooltips: {
-                                callbacks: {
-                                    title: function(tooltipItems) {
-                                        return 'Predicted Value: ' + tooltipItems[0].label;
+                                options: {
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: 'Prompts Average & Forecasted Value for Next Session'
+                                        },
+                                        legend: {
+                                            display: false
+                                        }
                                     },
-                                    label: function(tooltipItem) {
-                                        const predicted = tooltipItem.raw;
-                                        return 'Description: ' + descriptions[predicted];
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true
+                                        }
+                                    },
+                                    tooltips: {
+                                        callbacks: {
+                                            title: function (tooltipItems) {
+                                                return 'Predicted Value: ' + tooltipItems[0].label;
+                                            },
+                                            label: function (tooltipItem) {
+                                                const predicted = tooltipItem.raw;
+                                                return 'Description: ' + descriptions[predicted];
+                                            }
+                                        }
                                     }
                                 }
-                            }
+                            });
+
+                            // Show the chart container
+                            document.getElementById('chartContainer').style.display = 'block';
+                            document.getElementById('printButton').style.display = 'block';
+                        } else {
+                            // Display "No data available" message if no data is available
+                            document.getElementById('chartContainer').innerHTML = '<p>No data available</p>';
                         }
-                    });
+                    },
 
-                    // Show the chart container
-                    document.getElementById('chartContainer').style.display = 'block';
-                    document.getElementById('printButton').style.display = 'block';
-                } else {
-                    // Display "No data available" message if no data is available
-                    document.getElementById('chartContainer').innerHTML = '<p>No data available</p>';
-                }
-            },
-
-            error: function(xhr, status, error) {
-                // Handle error
-                Swal.fire({
-                    title: 'Error',
-                    text: 'An error occurred while processing your request.',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
+                    error: function (xhr, status, error) {
+                        // Handle error
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'An error occurred while processing your request.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
                 });
+            });
+            // Function to handle the print page navigation
+            function openPrintPage() {
+                const dates = Object.keys(responseData.Prompts);
+                const values = Object.values(responseData.Prompts);
+                const predictedPrompt = responseData.predicted_prompt;
+
+                // Combine dates and values into a JSON string
+                const chartData = JSON.stringify({ dates: [...dates, 'Predicted'], values: [...values, predictedPrompt] });
+
+                // Store chart data in session storage
+                sessionStorage.setItem('chartData', chartData);
+
+                const patient_id = getUrlParameter('pid');
+                window.location.href = 'print-profile.php?pid=' + patient_id;
             }
-        });
-    });
-    // Function to handle the print page navigation
-    function openPrintPage() {
-        const dates = Object.keys(responseData.Prompts);
-        const values = Object.values(responseData.Prompts);
-        const predictedPrompt = responseData.predicted_prompt;
-
-        // Combine dates and values into a JSON string
-        const chartData = JSON.stringify({ dates: [...dates, 'Predicted'], values: [...values, predictedPrompt] });
-
-        // Store chart data in session storage
-        sessionStorage.setItem('chartData', chartData);
-
-        const patient_id = getUrlParameter('pid');
-        window.location.href = 'print-profile.php?pid=' + patient_id;
-    }
             $('#printButton').click(openPrintPage);
-    })
-    // Function to get URL parameters
-    function getUrlParameter(name) {
-        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-        var results = regex.exec(location.search);
-        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-    }
+        })
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
 
     </script>
 
