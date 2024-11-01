@@ -1,10 +1,12 @@
 <?php
 session_start();
 include '../BACKEND/config/db.php';
+require '../vendor/autoload.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/MANECLICK-V.2/BACKEND/Util/paypal.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require '../vendor/autoload.php';
 
 if (!isset($_SESSION['username'])) {
     header("Location: login.php");
@@ -17,9 +19,9 @@ if ($_SESSION['role'] !== 'SLP') {
 }
 
 $user_id = $_SESSION['user_id'];
-$email =$_SESSION['email'];
+$email = $_SESSION['email'];
 // Check subscription
-$stmt = $conn->prepare("SELECT * FROM subscription WHERE user_id = :user_id");
+$stmt = $conn->prepare("SELECT * FROM subscription WHERE user_id = :user_id order by createdAt DESC");
 $stmt->bindParam(':user_id', $user_id);
 $stmt->execute();
 $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -28,6 +30,12 @@ if (!$subscription) {
     header("Location: getplans.php");
     exit;
 }
+
+$_SESSION['paypal_sub_id'] = $subscription['paypal_sub_id'];
+paypalGetSubscriptionInfo($subscription['paypal_sub_id']);
+
+$stmt->execute();
+$subscription = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $subscription_type = $subscription['type'];
 $subscription_status = $subscription['status'];
@@ -76,6 +84,7 @@ foreach ($sessionsData as $data) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -91,16 +100,19 @@ foreach ($sessionsData as $data) {
         }
     </style>
 </head>
+
 <body>
     <div id="header">
         <?php include './component/pageHeader.php'; ?>
     </div>
     <div id="container">
-        <div style="border:1px solid white; justify-content:center; padding:20px 15px; width:50%; background-color:white; box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px; border-radius:.5rem;">
+        <div
+            style="border:1px solid white; justify-content:center; padding:20px 15px; width:50%; background-color:white; box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px; border-radius:.5rem;">
             <h1>Welcome, <?php echo $_SESSION['username']; ?>!</h1>
         </div>
         <div style="display: flex; width:50%; margin-top:10px; font-size:24px; font-weight:600;">
-            <div style="display: flex; flex-direction:column; background-color:white; width:48%; margin-right:2%; padding:10px; box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px; border-radius:.5rem;">
+            <div
+                style="display: flex; flex-direction:column; background-color:white; width:48%; margin-right:2%; padding:10px; box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px; border-radius:.5rem;">
                 <text>Subscription: <?php echo $subscription_type; ?></text>
                 <text>
                     Payment Status:
@@ -108,117 +120,134 @@ foreach ($sessionsData as $data) {
                         <?php echo ($subscription['status'] == 0) ? 'Pending' : 'Accepted'; ?>
                     </span>
                 </text>
-                <?php
-// Assuming $subscription['createdAt'] is in 'Y-m-d H:i:s' format
-$createdAt = new DateTime($subscription['createdAt']);
-$currentDate = new DateTime();
-
-// Add 30 days to the subscription start date to get the expiration date
-$expirationDate = clone $createdAt;
-$expirationDate->modify('+30 days');
-
-// Remove time portion for the date comparison
-$currentDateOnly = $currentDate->format('Y-m-d');
-$expirationDateOnly = $expirationDate->format('Y-m-d');
-
-// Calculate the difference in days between the current date and the expiration date
-$interval = (new DateTime($currentDateOnly))->diff(new DateTime($expirationDateOnly));
 
 
-// If the subscription is already expired (current date is after the expiration date)
-if ($currentDateOnly > $expirationDateOnly) {
-    echo "<text style='color:red'>Subscription Expired</text>";
-
-    $mail = new PHPMailer(true);
-    
-    try {
-        // Server settings
-        $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com'; // SMTP server
-        $mail->SMTPAuth   = true;
-        $mail->Username   = 'masukista001@gmail.com'; // SMTP username
-        $mail->Password   = 'rnsfukcsbvqcdeqv'; // SMTP password
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Encryption type
-        $mail->Port       = 587;
-  
-        // Sender and recipient settings
-        $mail->setFrom('masukista001@gmail.com', 'ManeClick');
-        $mail->addAddress($email); // Use the email from the AJAX request
-  
-        // Mail content
-        $mail->isHTML(true); // Set email format to HTML
-        $mail->Subject = 'Important Patient Update';
-        $mail->Body = "Dear User, your subscription already expired. Please subscribe again to continue using this service.";
-  
-        if ($mail->send()) {
-  
-        } else {
-           
-        }
-    } catch (Exception $e) {
-        echo json_encode(['status' => 'fail', 'error' => $mail->ErrorInfo]);
-    }
-
-}
-// If the subscription is within the last 7 days before expiration
-elseif ($interval->days <= 7) {
-    echo "<text>Subscription Notification: <span  style='color:red'>  {$interval->days} days remaining</span></text>";
-
-  // Create a new PHPMailer instance
-  $mail = new PHPMailer(true);
-    
-  try {
-      // Server settings
-      $mail->isSMTP();
-      $mail->Host       = 'smtp.gmail.com'; // SMTP server
-      $mail->SMTPAuth   = true;
-      $mail->Username   = 'masukista001@gmail.com'; // SMTP username
-      $mail->Password   = 'rnsfukcsbvqcdeqv'; // SMTP password
-      $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Encryption type
-      $mail->Port       = 587;
-
-      // Sender and recipient settings
-      $mail->setFrom('masukista001@gmail.com', 'ManeClick');
-      $mail->addAddress($email); // Use the email from the AJAX request
-
-      // Mail content
-      $mail->isHTML(true); // Set email format to HTML
-      $mail->Subject = 'Important Patient Update';
-      $mail->Body = "Dear User, you have {$interval->days} days left remaining in your subscription. Please subscribe again to continue using this service.";
-
-      if ($mail->send()) {
-
-      } else {
-         
-      }
-  } catch (Exception $e) {
-      echo json_encode(['status' => 'fail', 'error' => $mail->ErrorInfo]);
-  }
-
-}
-?>
-
-
-
+                <button onclick="unsubscribe()" <?php echo ($subscription['status'] == 0) ? 'hidden' : ''; ?>
+                    style="width: 100%;  height:100%; padding: 5px; border: none; background-color: #133A1B; color: white; font-size: 16px; cursor: pointer; font-size:large; margin-right:1%; margin-bottom:1%">Unsubscribe</button>
                 
+                <button onclick="showplans()" <?php echo ($subscription['status'] == 1) ? 'hidden' : ''; ?>
+                    style="width: 100%;  height:100%; padding: 5px; border: none; background-color: #133A1B; color: white; font-size: 16px; cursor: pointer; font-size:large; margin-right:1%">show plans</button>
+                
+                <?php
+                // Assuming $subscription['createdAt'] is in 'Y-m-d H:i:s' format
+                $nextPaymentDate = new DateTime($subscription['next_payment_date']);
+                $currentDate = new DateTime();
+
+                // Add 30 days to the subscription start date to get the expiration date
+                $expirationDate = clone $nextPaymentDate;
+                $expirationDate->modify('-1 days');
+
+                // Remove time portion for the date comparison
+                $currentDateOnly = $currentDate->format('Y-m-d');
+                $expirationDateOnly = $expirationDate->format('Y-m-d');
+
+                // Calculate the difference in days between the current date and the expiration date
+                $interval = (new DateTime($currentDateOnly))->diff(new DateTime($expirationDateOnly));
+
+
+                // If the subscription is already expired (current date is after the expiration date)
+                if ($currentDateOnly > $expirationDateOnly) {
+                    echo "<text style='color:red'>Subscription Expired</text>";
+
+                    $mail = new PHPMailer(true);
+
+                    try {
+                        // Server settings
+                        $mail->isSMTP();
+                        $mail->Host = 'smtp.gmail.com'; // SMTP server
+                        $mail->SMTPAuth = true;
+                        $mail->Username = 'masukista001@gmail.com'; // SMTP username
+                        $mail->Password = 'rnsfukcsbvqcdeqv'; // SMTP password
+                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Encryption type
+                        $mail->Port = 587;
+
+                        // Sender and recipient settings
+                        $mail->setFrom('masukista001@gmail.com', 'ManeClick');
+                        $mail->addAddress($email); // Use the email from the AJAX request
+                
+                        // Mail content
+                        $mail->isHTML(true); // Set email format to HTML
+                        $mail->Subject = 'Important Patient Update';
+                        $mail->Body = "Dear User, your subscription already expired. Please subscribe again to continue using this service.";
+
+                        if ($mail->send()) {
+
+                        } else {
+
+                        }
+                    } catch (Exception $e) {
+                        echo json_encode(['status' => 'fail', 'error' => $mail->ErrorInfo]);
+                    }
+
+                }
+                // If the subscription is within the last 7 days before expiration
+                elseif ($interval->days <= 7) {
+                    echo "<text>Subscription Notification: <span  style='color:red'>  {$interval->days} days remaining</span></text>";
+
+                    // Create a new PHPMailer instance
+                    $mail = new PHPMailer(true);
+
+                    try {
+                        // Server settings
+                        $mail->isSMTP();
+                        $mail->Host = 'smtp.gmail.com'; // SMTP server
+                        $mail->SMTPAuth = true;
+                        $mail->Username = 'masukista001@gmail.com'; // SMTP username
+                        $mail->Password = 'rnsfukcsbvqcdeqv'; // SMTP password
+                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Encryption type
+                        $mail->Port = 587;
+
+                        // Sender and recipient settings
+                        $mail->setFrom('masukista001@gmail.com', 'ManeClick');
+                        $mail->addAddress($email); // Use the email from the AJAX request
+                
+                        // Mail content
+                        $mail->isHTML(true); // Set email format to HTML
+                        $mail->Subject = 'Important Patient Update';
+                        $mail->Body = "Dear User, you have {$interval->days} days left remaining in your subscription. Please subscribe again to continue using this service.";
+
+                        if ($mail->send()) {
+
+                        } else {
+
+                        }
+                    } catch (Exception $e) {
+                        echo json_encode(['status' => 'fail', 'error' => $mail->ErrorInfo]);
+                    }
+
+                }
+                ?>
+
+
+
+
             </div>
-            <div style="background-color: white; width: 50%; padding: 10px; display: flex; flex-direction: row; align-items: center; box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px; border-radius:.5rem;">
+            <div
+                style="background-color: white; width: 50%; padding: 10px; display: flex; flex-direction: row; align-items: center; box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px; border-radius:.5rem;">
                 <?php if ($subscription['status'] == 1) { ?>
-                    <button onclick="navigate()" style="width: 100%;  height:100%; padding: 10px; border: none; background-color: #133A1B; color: white; font-size: 16px; cursor: pointer; font-size:large; margin-right:1%">My Patients</button>
+                    <button onclick="navigate()"
+                        style="width: 100%;  height:100%; padding: 10px; border: none; background-color: #133A1B; color: white; font-size: 16px; cursor: pointer; font-size:large; margin-right:1%">My
+                        Patients</button>
                 <?php } else { ?>
-                    <button onclick="showPendingMessage()" style="width: 100%;  height:100%; padding: 10px; border: none; background-color: #133A1B; color: white; font-size: 16px; cursor: pointer; font-size:large; margin-right:1%">My Patients</button>
+                    <button onclick="showPendingMessage()"
+                        style="width: 100%;  height:100%; padding: 10px; border: none; background-color: #133A1B; color: white; font-size: 16px; cursor: pointer; font-size:large; margin-right:1%">My
+                        Patients</button>
                 <?php } ?>
-                <button onclick="navigateProfile()" style="width: 100%; height:100%; padding: 10px; border: none; background-color: #133A1B; color: white; font-size: 16px; cursor: pointer; font-size:large">Profile</button>
+                <button onclick="navigateProfile()"
+                    style="width: 100%; height:100%; padding: 10px; border: none; background-color: #133A1B; color: white; font-size: 16px; cursor: pointer; font-size:large">Profile</button>
             </div>
         </div>
         <div style="display: flex; justify-content: space-between; width: 80%; margin-top: 20px; height: 50%">
-            <div style="width: 32%; background-color: white; padding: 10px; box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px; border-radius:.5rem;">
+            <div
+                style="width: 32%; background-color: white; padding: 10px; box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px; border-radius:.5rem;">
                 <canvas id="patientChart"></canvas>
             </div>
-            <div style="width: 32%; background-color: white; padding: 10px; box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px; border-radius:.5rem;">
+            <div
+                style="width: 32%; background-color: white; padding: 10px; box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px; border-radius:.5rem;">
                 <canvas id="archiveChart"></canvas>
             </div>
-            <div style="width: 32%; background-color: white; padding: 10px; box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px; border-radius:.5rem;">
+            <div
+                style="width: 32%; background-color: white; padding: 10px; box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px; border-radius:.5rem;">
                 <canvas id="sessionChart"></canvas>
             </div>
         </div>
@@ -242,6 +271,13 @@ elseif ($interval->days <= 7) {
                 confirmButtonColor: '#3085d6',
                 confirmButtonText: 'OK'
             });
+        }
+
+        function unsubscribe(params) {
+            window.location.href = "/MANECLICK-V.2/FRONTEND/unsubscribe.php";
+        }
+        function showplans(params) {
+            window.location.href = "/MANECLICK-V.2/FRONTEND/getplans.php";
         }
 
         // Data from PHP for patients
@@ -318,14 +354,14 @@ elseif ($interval->days <= 7) {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false, 
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         position: 'top',
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 // Label format
                                 let label = context.label || '';
                                 let value = context.raw; // raw data value
@@ -338,10 +374,10 @@ elseif ($interval->days <= 7) {
                     title: {
                         display: true,
                         text: 'Archived Patients',
-                        position: 'top', 
+                        position: 'top',
                         font: {
-                            size: 18, 
-                            weight: 'bold' 
+                            size: 18,
+                            weight: 'bold'
                         },
                         padding: {
                             top: 10,
@@ -354,4 +390,5 @@ elseif ($interval->days <= 7) {
 
     </script>
 </body>
+
 </html>

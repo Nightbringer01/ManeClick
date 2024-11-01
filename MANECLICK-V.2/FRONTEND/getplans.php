@@ -59,7 +59,9 @@ $username = $_SESSION['username'];
                                     <li>* 5 Printable Progress Reports</li>
                                     <li>* 1 Month Free Access</li>
                                 </ul>
-                                <button class="btn btn-primary btn-block plan-btn" data-plan-type="Free Trial" data-plan-cost="1" style="background-color: #133A1B">Get This Plan</button>
+                                <button class="btn btn-primary btn-block plan-btn"
+                                    data-plan-id="P-32P39081NY533603LM4QPWLI" style="background-color: #133A1B">Get This
+                                    Plan</button>
                             </div>
                         </div>
                     </div>
@@ -73,7 +75,9 @@ $username = $_SESSION['username'];
                                     <li>* Trending Graph Data Per Patient</li>
                                     <li>* 10 Printable Progress Reports</li>
                                 </ul>
-                                <button class="btn btn-primary btn-block plan-btn" data-plan-type="Standard Plan" data-plan-cost="499" style="background-color: #133A1B">Get This Plan</button>
+                                <button class="btn btn-primary btn-block plan-btn"
+                                    data-plan-id="P-8RF367232M1112156M4QPXCI" style="background-color: #133A1B">Get This
+                                    Plan</button>
                             </div>
                         </div>
                     </div>
@@ -89,13 +93,16 @@ $username = $_SESSION['username'];
                                     <li>* 10 years access to data progress reports</li>
                                     <li>* Monthly statistical report of SLP Activity</li>
                                 </ul>
-                                <button class="btn btn-primary btn-block plan-btn" data-plan-type="Premium Plan" data-plan-cost="1299" style="background-color: #133A1B">Get This Plan</button>
+                                <button class="btn btn-primary btn-block plan-btn"
+                                    data-plan-id="P-63F93600HJ582545BM4QPXKI" style="background-color: #133A1B">Get This
+                                    Plan</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="P-3 m-8" style="border: 1px solid black; width: 20%; display: flex; justify-content: center; align-items: center; background-color: white;">
+            <div class="P-3 m-8"
+                style="border: 1px solid black; width: 20%; display: flex; justify-content: center; align-items: center; background-color: white;">
                 <div id="paypal-button-container"></div>
             </div>
 
@@ -103,66 +110,84 @@ $username = $_SESSION['username'];
         </div>
 
         <script
-            src="https://www.paypal.com/sdk/js?client-id=AXxGfSK3mhlmMp539dsB73sP4urViy1dlqoLuqetvcoMoSC0Ch2X7EX0CxM8pQN8QyiyzS1zDvYle6-d"></script>
+            src="https://www.paypal.com/sdk/js?client-id=AT_mrkMtK7_CsipGUBBHI7kEJ87qUgU_8zKG6FqCsn93CI_nasCqL8-q_sz6ce3TZBXHDzz9-F6SqJ0a&vault=true&intent=subscription"
+            data-sdk-integration-source="button-factory"></script>
 
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                let planCost = null;
-                let planType = null;
+            document.addEventListener('DOMContentLoaded', function () {
+                let planid = null;
                 const user_id = "<?php echo $user_id; ?>";
 
                 var planButtons = document.querySelectorAll('.plan-btn');
-                planButtons.forEach(function(button) {
-                    button.addEventListener('click', function() {
-                        planCost = this.getAttribute('data-plan-cost');
-                        planType = getPlanType(planCost); 
-                        updatePayPalButton(planCost);
+                planButtons.forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        planid = this.getAttribute('data-plan-id');
+                        updatePayPalButton(planid);
                     });
                 });
 
-                function getPlanType(cost) {
-                    switch (cost) {
-                        case '1':
+                function getPlanType(planid) {
+                    switch (planid) {
+                        case 'P-32P39081NY533603LM4QPWLI':
                             return 'Free Trial';
-                        case '499':
+                        case 'P-8RF367232M1112156M4QPXCI':
                             return 'Standard Plan';
-                        case '1299':
+                        case 'P-63F93600HJ582545BM4QPXKI':
                             return 'Premium Plan';
                         default:
                             return 'Unknown';
                     }
                 }
 
-                function updatePayPalButton(planCost) {
+                function getPlanCost(planid) {
+                    switch (planid) {
+                        case 'P-32P39081NY533603LM4QPWLI':
+                            return 1;
+                        case 'P-8RF367232M1112156M4QPXCI':
+                            return 499;
+                        case 'P-63F93600HJ582545BM4QPXKI':
+                            return 1299;
+                        default:
+                            return 0;
+                    }
+                }
+
+                function updatePayPalButton(planid) {
                     const paypalButtonContainer = document.getElementById('paypal-button-container');
                     paypalButtonContainer.innerHTML = ''; // Clear previous button
 
-                    renderPayPalButton(planCost);
+                    renderPayPalButton(planid);
                 }
 
-                function renderPayPalButton(planCost) {
+                function renderPayPalButton(planid) {
+
                     paypal.Buttons({
-                        createOrder: function(data, actions) {
-                            return actions.order.create({
-                                purchase_units: [{
-                                    amount: {
-                                        value: planCost
-                                    }
-                                }]
+                        style: {
+                            shape: 'pill',
+                            color: 'gold',
+                            layout: 'vertical',
+                            label: 'subscribe'
+                        },
+                        createSubscription: function (data, actions) {
+                            return actions.subscription.create({
+                                /* Creates the subscription */
+                                plan_id: planid
                             });
                         },
-                        onApprove: function(data, actions) {
-                            return actions.order.capture().then(function(details) {
-                    
-                                const formData = new FormData();
-                                formData.append('user_id', user_id);
-                                formData.append('type', planType); 
-                                formData.append('plan_cost', planCost);
+                        onApprove: function (data, actions) {
 
-                                fetch('../BACKEND/routes/subscription_process.php', {
-                                    method: 'POST',
-                                    body: formData
-                                })
+                            const formData = new FormData();
+                            formData.append('user_id', user_id);
+                            formData.append('type', getPlanType(planid));
+                            formData.append('plan_cost', getPlanCost(planid));
+                            formData.append('paypal_sub_id', data.subscriptionID);
+                            formData.append('paypal_facilitator_access_token', data.facilitatorAccessToken);
+                            formData.append('paypal_order_id', data.orderID);
+
+                            fetch('../BACKEND/routes/subscription_process.php', {
+                                method: 'POST',
+                                body: formData
+                            })
                                 .then(response => {
                                     if (response.ok) {
                                         return response.json();
@@ -175,7 +200,7 @@ $username = $_SESSION['username'];
                                         icon: 'success',
                                         title: 'Success',
                                         text: 'Successfully subscribed to the plan'
-                                    }).then(function() {
+                                    }).then(function () {
                                         window.location.href = 'homepage.php';
                                     });
                                 })
@@ -187,12 +212,12 @@ $username = $_SESSION['username'];
                                         text: 'Subscription failed'
                                     });
                                 });
-                            });
                         }
-                    }).render('#paypal-button-container');
+                    }).render('#paypal-button-container'); // Renders the PayPal button
                 }
             });
         </script>
 
-    </body>
+</body>
+
 </html>

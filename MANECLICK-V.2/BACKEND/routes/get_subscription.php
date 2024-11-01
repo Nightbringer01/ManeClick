@@ -5,7 +5,7 @@ if (isset($_GET['user_id'])) {
     $userId = $_GET['user_id'];
 
     // Query to fetch subscription information based on user ID
-    $stmt = $conn->prepare("SELECT * FROM subscription WHERE user_id = :user_id");
+    $stmt = $conn->prepare("SELECT * FROM subscription WHERE user_id = :user_id order by createdAt desc");
     $stmt->bindParam(':user_id', $userId);
     $stmt->execute();
     $subscription = $stmt->fetch(PDO::FETCH_ASSOC);

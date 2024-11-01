@@ -702,8 +702,6 @@ $userDets = $stmt->fetch(PDO::FETCH_ASSOC);
             var guardian = row.find('td:nth-child(12)').text();
             var status = row.find('td:nth-child(13)').text();
 
-            console.log(address);
-
             // Populate modal inputs with retrieved data
             $('#editPatientId').val(patientId);
             $('#editFirstName').val(firstName);
@@ -717,9 +715,16 @@ $userDets = $stmt->fetch(PDO::FETCH_ASSOC);
             $('#editGuardian').val(guardian);
             $('#editStatus').val(status);
 
-            $('#selected_barangay_name').val(province);
-            $('#selected_barangay_name').val(city);
-            $('#selected_barangay_name').val(barangay);
+            $('#editCity').html('<option value="'+city+'">'+city+'</option>');
+            $('#editBarangay').html('<option value="'+barangay+'">'+barangay+'</option>');
+            
+            $('#editProvince').val(province);
+            $('#editCity').val(city);
+            $('#editBarangay').val(barangay);
+
+            $('#selected_province_name').val(province); // Set hidden field for name
+            $('#selected_city_name').val(city); // Set hidden field for name
+            $('#selected_barangay_name').val(barangay); // Set hidden field for name
 
             // Open the edit patient modal
             $('#editPatientModal').modal('show');
