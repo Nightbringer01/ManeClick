@@ -4,6 +4,9 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 require '../../vendor/autoload.php'; // Ensure PHPMailer is loaded
+$dotenv = Dotenv\Dotenv::createImmutable($_SERVER['DOCUMENT_ROOT'] . '/MANECLICK-V.2');
+$dotenv->load();
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
@@ -87,13 +90,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $mail->isSMTP();
                 $mail->Host       = 'smtp.gmail.com'; // SMTP server
                 $mail->SMTPAuth   = true;
-                $mail->Username   = 'masukista001@gmail.com'; // SMTP username
-                $mail->Password   = 'rnsfukcsbvqcdeqv'; // SMTP password
+                $mail->Username   = $_ENV['Email_Acc']; // SMTP username
+                $mail->Password   = $_ENV['Email_pass']; // SMTP password
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Encryption type
                 $mail->Port       = 587;
 
                 // Sender and recipient settings
-                $mail->setFrom('masukista001@gmail.com', 'ManeClick');
+                $mail->setFrom($_ENV['Email_Acc'], 'ManeClick');
                 $mail->addAddress($email); // User's email
 
                 // Create a verification link

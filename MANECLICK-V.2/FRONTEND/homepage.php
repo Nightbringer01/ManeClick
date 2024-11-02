@@ -7,6 +7,9 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/MANECLICK-V.2/BACKEND/Util/paypal.php
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+$dotenv = Dotenv\Dotenv::createImmutable($_SERVER['DOCUMENT_ROOT'] . '/MANECLICK-V.2');
+$dotenv->load();
+
 
 if (!isset($_SESSION['username'])) {
     header("Location: login.php");
@@ -156,13 +159,13 @@ foreach ($sessionsData as $data) {
                         $mail->isSMTP();
                         $mail->Host = 'smtp.gmail.com'; // SMTP server
                         $mail->SMTPAuth = true;
-                        $mail->Username = 'masukista001@gmail.com'; // SMTP username
-                        $mail->Password = 'rnsfukcsbvqcdeqv'; // SMTP password
+                        $mail->Username   = $_ENV['Email_Acc']; // SMTP username
+                        $mail->Password   = $_ENV['Email_pass']; // SMTP password
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Encryption type
                         $mail->Port = 587;
 
                         // Sender and recipient settings
-                        $mail->setFrom('masukista001@gmail.com', 'ManeClick');
+                        $mail->setFrom($_ENV['Email_Acc'], 'ManeClick');
                         $mail->addAddress($email); // Use the email from the AJAX request
                 
                         // Mail content
@@ -192,13 +195,13 @@ foreach ($sessionsData as $data) {
                         $mail->isSMTP();
                         $mail->Host = 'smtp.gmail.com'; // SMTP server
                         $mail->SMTPAuth = true;
-                        $mail->Username = 'masukista001@gmail.com'; // SMTP username
-                        $mail->Password = 'rnsfukcsbvqcdeqv'; // SMTP password
+                        $mail->Username   = $_ENV['Email_Acc']; // SMTP username
+                        $mail->Password   = $_ENV['Email_pass']; // SMTP password
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Encryption type
                         $mail->Port = 587;
 
                         // Sender and recipient settings
-                        $mail->setFrom('masukista001@gmail.com', 'ManeClick');
+                        $mail->setFrom($_ENV['Email_Acc'], 'ManeClick');
                         $mail->addAddress($email); // Use the email from the AJAX request
                 
                         // Mail content

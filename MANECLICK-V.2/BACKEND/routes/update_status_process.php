@@ -7,6 +7,9 @@ use PHPMailer\PHPMailer\Exception;
 
 require '../../vendor/autoload.php';
 
+$dotenv = Dotenv\Dotenv::createImmutable($_SERVER['DOCUMENT_ROOT'] . '/MANECLICK-V.2');
+$dotenv->load();
+
 $response = array();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -57,13 +60,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com'; // SMTP server
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'masukista001@gmail.com'; // SMTP username
-            $mail->Password   = 'rnsfukcsbvqcdeqv'; // SMTP password
+            $mail->Username   = $_ENV['Email_Acc']; // SMTP username
+            $mail->Password   = $_ENV['Email_pass']; // SMTP password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Encryption type
             $mail->Port       = 587;
     
             // Sender and recipient settings
-            $mail->setFrom('masukista001@gmail.com', 'ManeClick');
+            $mail->setFrom($_ENV['Email_Acc'], 'ManeClick');
             $mail->addAddress($email); // Use the email from the AJAX request
     
             // Mail content
