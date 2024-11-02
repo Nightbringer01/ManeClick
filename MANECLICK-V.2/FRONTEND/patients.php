@@ -135,9 +135,6 @@ $userDets = $stmt->fetch(PDO::FETCH_ASSOC);
                                 <a href="#" id="editPatientBtn" name="editPatientBtn" class="text-primary editPatientBtn"
                                     data-id="<?php echo $patient['id']; ?>"><i class="fas fa-edit"></i></a>
                                 <!-- Email icon -->
-                                <a href="#" class="text-success sendEmailBtn" data-id="<?php echo $patient['id']; ?>"
-                                    data-email="<?php echo decrypt($patient['email'], $_SESSION['encrypt_key']); ?>"><i
-                                        class="fas fa-envelope"></i></a>
                                 <!-- Email icon -->
                             </td>
                         </tr>
