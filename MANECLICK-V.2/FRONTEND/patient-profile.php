@@ -407,10 +407,28 @@ foreach ($sessionsHistory as $session) {
                     <h5 class="card-title"
                         style="font-size: x-large; font-weight:800; color:#415E35; font-family: 'Roboto', sans-serif;">
                         Generate Report </h5>
+
                 </div>
                 <div class="card-body">
                     <form id="arimaForm" method="get">
-                        <button type="submit" class="btn3 btn-primary">GENERATE REPORT</button>
+                        <div class="row">
+                            <button type="submit" class="btn3 btn-primary">GENERATE REPORT</button>
+                            <div class="form-group ml-5">
+                                <label for="PredictionDomain">Predict next X scores</label>
+                                <select class="form-control" id="PredictionDomain" name="PredictionDomain" required>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+                                </select>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <!-- Empty div to hold the chart -->
@@ -418,9 +436,6 @@ foreach ($sessionsHistory as $session) {
 
                 </div>
                 <button id="printButton" style="display:none;" onclick="openPrintPage()">GO TO PRINT PAGE</button>
-
-
-
             </div>
         </div>
     </div>
@@ -611,34 +626,34 @@ foreach ($sessionsHistory as $session) {
             function addWordPrompt() {
                 if (wordCount < maxWords) {
                     var wordPromptHtml = `
-                    <div class="col-md-6">
-                        <div class="word-prompt">
-                            <div class="form-group">
-                                <label for="word${wordCount}">Word ${wordCount + 1}</label>
-                                <input type="text" class="form-control" id="word${wordCount}" name="word[]" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="prompt${wordCount}">Prompt</label>
-                                <select class="form-control" id="prompt${wordCount}" name="prompt[]" required>
-                                    <option value="">Select Prompt Type</option>
-                                    <option value="Correct independent production">Correct independent production</option>
-                                    <option value="Visual prompt">Visual prompt</option>
-                                    <option value="Verbal prompt">Verbal prompt</option>
-                                    <option value="Tactile prompt">Tactile prompt</option>
-                                    <option value="Hand under hand assistance">Hand under hand assistance</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="interpretation${wordCount}">Interpretation</label>
-                                <textarea class="form-control" id="interpretation${wordCount}" name="interpretation[]"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="remarks${wordCount}">Remarks</label>
-                                <textarea class="form-control" id="remarks${wordCount}" name="remarks[]"></textarea>
+                        <div class="col-md-6">
+                            <div class="word-prompt">
+                                <div class="form-group">
+                                    <label for="word${wordCount}">Word ${wordCount + 1}</label>
+                                    <input type="text" class="form-control" id="word${wordCount}" name="word[]" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="prompt${wordCount}">Prompt</label>
+                                    <select class="form-control" id="prompt${wordCount}" name="prompt[]" required>
+                                        <option value="">Select Prompt Type</option>
+                                        <option value="Correct independent production">Correct independent production</option>
+                                        <option value="Visual prompt">Visual prompt</option>
+                                        <option value="Verbal prompt">Verbal prompt</option>
+                                        <option value="Tactile prompt">Tactile prompt</option>
+                                        <option value="Hand under hand assistance">Hand under hand assistance</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="interpretation${wordCount}">Interpretation</label>
+                                    <textarea class="form-control" id="interpretation${wordCount}" name="interpretation[]"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="remarks${wordCount}">Remarks</label>
+                                    <textarea class="form-control" id="remarks${wordCount}" name="remarks[]"></textarea>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                        `;
                     if (wordCount % 2 === 0) {
                         $('#wordPrompts').append(`<div class="row"></div>`);
                     }
@@ -651,7 +666,17 @@ foreach ($sessionsHistory as $session) {
 
             // Event listener for the add word prompt button
             $('#addWordPrompt').click(function () {
-                addWordPrompt();
+                if ($('#goal').val().split(" ").length < 2) {
+                    Swal.fire({
+                        title: 'Cannot Proceed',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        text: 'Be more descriptive with this session\'s goal'
+                    });
+                }
+                else {
+                    addWordPrompt();
+                }
             });
 
             // function handleFormSubmit(event) {
@@ -784,15 +809,17 @@ foreach ($sessionsHistory as $session) {
                 $.ajax({
                     type: 'GET',
                     url: 'http://54.252.254.132:8080/api/arima',
+                    // url: 'http://localhost:8080/api/arima',
                     contentType: 'application/json',
                     data: ({ // Convert data to JSON string
                         patient_id: patient_id,
                         p_value: p,
                         q_value: q,
-                        d_value: d
+                        d_value: d,
+                        steps: $('#PredictionDomain').val(),
                     }),
                     success: function (response) {
-
+                        const rangeOfNumbers = (a, b) => [...Array(b + 1).keys()].slice(a)
                         // Check if there is data available
                         if (Object.keys(response.Prompts).length > 0) {
 
@@ -824,13 +851,25 @@ foreach ($sessionsHistory as $session) {
 
                             // Create a new Chart instance
                             const ctx = document.getElementById('myChart').getContext('2d');
+
+
+                            // label creation
+
+                            let predLbls = [];
+                            for (a = 1; a <= $('#PredictionDomain').val(); a++) {
+                                predLbls.push("Prediction " + a);
+                            }
+
+                            const lbls = ([...dates]).concat(predLbls);
+                            const vals = ([...values]).concat(predictedPrompt);
+
                             const myChart = new Chart(ctx, {
                                 type: 'line',
                                 data: {
-                                    labels: [...dates, 'Predicted'],
+                                    labels: lbls,
                                     datasets: [{
                                         label: 'Prompt Values',
-                                        data: [...values, predictedPrompt],
+                                        data: vals,
                                         backgroundColor: (context) => {
                                             // Set different colors for actual prompts and the predicted prompt
                                             return context.raw === predictedPrompt ? 'rgba(255, 99, 132, 0.2)' : 'rgba(75, 192, 192, 0.2)';

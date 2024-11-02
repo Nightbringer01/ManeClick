@@ -474,3 +474,4 @@ composer.lock
 *.sass.map
 *.scss.map
 MANECLICK-V.2/.env
+MANECLICK-V.2/BACKEND/filestore/TherapyReport.pdf
